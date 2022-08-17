@@ -1,0 +1,8 @@
+[
+    {
+        "input": "rtsp://admin:pasword@device.lan:554",
+        "out_dir": "/tmp/",
+        "out_file": "device_%Y-%m-%d_%H-%M-%S.mp4",
+        "segment_time": "00:05:00"
+    }
+]
