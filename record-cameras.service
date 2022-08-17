@@ -1,0 +1,14 @@
+[Unit]
+Description=Streamer
+After=multi-user.target network-online.target
+
+[Service]
+WorkingDirectory=/home/drew/playin/camera-ffmpeg-daemon # change this to the path of the git repo
+ExecStart='node main.js'
+KillMode=control-group
+Restart=on-failure
+TimeoutSec=1
+
+[Install]
+WantedBy=multi-user.target
+Alias=record-cameras.service
