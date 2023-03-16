@@ -1,11 +1,13 @@
 const spawn = require('child_process').spawn;
 const config = require('config');
+const fs = require('fs');
 
 let timeout_count=0;
 
-let customLog;
+console.log(`process.argv[2] is ${process.argv[2]}`);
 
-(()=>{
+const customLog = (()=>{
+	let customLog;
 	if(/nolog/.test(process.argv[2])){
 		customLog = ()=>{};
 	}else{
@@ -13,6 +15,19 @@ let customLog;
 			console.log(...a);
 		};
 	}
+	return customLog;
+})();
+
+const customInfo = (()=>{
+	let customInfo;
+	if(/noinfo/.test(process.argv[2])){
+		customInfo = ()=>{};
+	}else{
+		customInfo = function (...a){
+			console.info(...a);
+		};
+	}
+	return customInfo;
 })();
 
 function setupRecording( {input, out_dir, out_file, segment_time} ){
@@ -44,7 +59,7 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 		ffmpeg_process.stderr.on('data', function (data) {
 			const s = data.toString();
 
-			customLog(s);
+			customInfo(s);
 
 			// TODO check if frame log, maybe take action on other events too 
 			if( /frame/.test(s) ){
@@ -54,23 +69,23 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 	
 		ffmpeg_process.on('exit', function (code) {
 			if( code !== null && code !== undefined ){
-				customLog('child process exited with code ' + code.toString());
+				customLog(`${out_file} - child process exited with code ` + code.toString());
 			}else{
-				customLog('child process exited. Code is either undefined or null');
+				customLog(`${out_file} - child process exited. Code is either undefined or null`);
 			}
 			killed=true;
 		});
 
 		function kickTheCan(){
 
-			customLog(`kickTheCan ${out_file}` );
+			customInfo(`kickTheCan ${out_file}` );
 
 			if( restart_timeout !== null ){
 				clearInterval(restart_timeout);
 			}
 
 			restart_timeout = setTimeout(async()=>{
-				customLog(`\n\n\n---------- NO UPDATE; RESTARTING RECORDING ${out_file} ----------\n\n\n`);
+				customLog(`---------- NO UPDATE; RESTARTING RECORDING ${out_file} ----------`);
 				customLog(`${timeout_count}`);
 
 				let kill_try_count = 0;
@@ -107,6 +122,12 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 (()=>{
 
 	Object.keys(config).forEach((i)=>{
+
+		if(!fs.existsSync(config[i].out_dir)){
+			console.error(`out_dir does not exist - ${config[i].out_dir}`);
+
+		}
+
 		setupRecording( {
 			input: config[i].input,
 			out_dir: config[i].out_dir,
