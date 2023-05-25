@@ -46,6 +46,11 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 
 		ffmpeg_process = spawn('ffmpeg',[
 			// `-loglevel`, `verbose`,
+			`-hwaccel_flags`, `allow_profile_mismatch`,
+			`-hwaccel`, `vaapi`,
+			`-hwaccel_device`, `/dev/dri/renderD128`,
+			`-hwaccel_output_format`, `vaapi`,
+			`-i`, `rtsp://user:gg2invRwMHqh7z6s@rear.lan:554/h264Preview_01_main`,
 			`-i`, input,
 			`-c`, `copy`,
 			`-map`, `0`,
