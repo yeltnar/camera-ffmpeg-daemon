@@ -1,10 +1,13 @@
 const spawn = require('child_process').spawn;
 const config = require('config');
 const fs = require('fs');
+const axios = require('axios');
 
 let timeout_count=0;
 
 console.log(`process.argv[2] is ${process.argv[2]}`);
+
+const {join_api_key, feeds} = config;
 
 const customLog = (()=>{
 	let customLog;
@@ -30,7 +33,7 @@ const customInfo = (()=>{
 	return customInfo;
 })();
 
-function setupRecording( {input, out_dir, out_file, segment_time} ){
+function setupRecording( {input, out_dir, out_file, segment_time, restartCallbackFn} ){
 
 	segment_time = segment_time || `00:05:00`;
 
@@ -50,7 +53,6 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 			`-hwaccel`, `vaapi`,
 			`-hwaccel_device`, `/dev/dri/renderD128`,
 			`-hwaccel_output_format`, `vaapi`,
-			`-i`, `rtsp://user:gg2invRwMHqh7z6s@rear.lan:554/h264Preview_01_main`,
 			`-i`, input,
 			`-c`, `copy`,
 			`-map`, `0`,
@@ -109,13 +111,16 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 
 				if(killed){
 					startRecording();
+					restartCallbackFn();
 				}else{
+					notify(`Could not kill camera record process for ${out_file}`);
 					throw new Error('Could not close old process... not sure how to continue');
 				}
 
 			},restart_delay);
 		}
 
+		// initial interval... will be called in a loop later 
 		kickTheCan();
 	}
 
@@ -126,22 +131,56 @@ function setupRecording( {input, out_dir, out_file, segment_time} ){
 
 (()=>{
 
-	Object.keys(config).forEach((i)=>{
+	Object.keys(feeds).forEach((i)=>{
 
-		if(!fs.existsSync(config[i].out_dir)){
-			console.error(`out_dir does not exist - ${config[i].out_dir}`);
-
+		if(!fs.existsSync(feeds[i].out_dir)){
+			console.error(`out_dir does not exist - ${feeds[i].out_dir}`);
 		}
 
+		let restart_count=0;
+		let last_restart_notified=null;
+
+		function restartCallbackFn(){
+			console.log({
+				"msg":"restartCallbackFn",
+				out_file:feeds[i].out_file,
+			});
+
+			// TODO make this not called if it has been recently
+			const max_restart_count = 2;
+			if( restart_count >= max_restart_count ){
+				if(last_restart_notified === null){
+					notify(`camera restarting ${max_restart_count} times - ${feeds[i].out_file}`);
+					last_restart_notified=new Date();
+					setTimeout(()=>{
+						last_restart_notified=null;
+					},1000*60*60); // 1 hr
+				}
+				restart_count=0;
+			}else{
+				restart_count++
+			}
+		}	
+
 		setupRecording( {
-			input: config[i].input,
-			out_dir: config[i].out_dir,
-			out_file: config[i].out_file,
-			segment_time: config[i].segment_time
+			input: feeds[i].input,
+			out_dir: feeds[i].out_dir,
+			out_file: feeds[i].out_file,
+			segment_time: feeds[i].segment_time,
+			restartCallbackFn,
 		});	
 	});
 
 })();
+
+function notify(text){
+	console.error(`\nnotify is not set up\n`);
+	axios.post(`https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush?apikey=${join_api_key}&deviceId=group.android`,{
+		title:"title",
+		text
+	});
+	console.error(`\n${text}\n`);
+}
 
 function timeoutPromise(ms){
 	return new Promise((resolve, reject)=>{
