@@ -141,20 +141,23 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 		let last_restart_notified=null;
 
 		function restartCallbackFn(){
+			
+			const max_restart_count = 2;
+			
 			console.log({
 				"msg":"restartCallbackFn",
 				out_file:feeds[i].out_file,
+				restart_count,
+				max_restart_count,
 			});
-
-			// TODO make this not called if it has been recently
-			const max_restart_count = 2;
+			
 			if( restart_count >= max_restart_count ){
 				if(last_restart_notified === null){
-					notify(`camera restarting ${max_restart_count} times - ${feeds[i].out_file}`);
+					notify(`camera restarting ${restart_count} times - ${feeds[i].out_file}`);
 					last_restart_notified=new Date();
 					setTimeout(()=>{
 						last_restart_notified=null;
-					},1000*60*60); // 1 hr
+					},1000*60*60); // reset after 1 hr
 				}
 				restart_count=0;
 			}else{
