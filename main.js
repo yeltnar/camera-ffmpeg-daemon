@@ -41,6 +41,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 	const restart_delay = 5000;
 	const disconnect_start_delay = 10000;
 
+	let last_notify=-1;
 	function startRecording(){
 
 		let ffmpeg_process = null; 
@@ -70,7 +71,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 
 			// TODO check if frame log, maybe take action on other events too 
 			if( /frame/.test(s) ){
-				kickTheCan();
+				kickTheCan(false);
 			}
 		});
 	
@@ -83,13 +84,27 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 			killed=true;
 		});
 
-		function kickTheCan(){
+		let last_kick=false;
+		function kickTheCan(kick_is_from_subprocess=true){
 
 			customInfo(`kickTheCan ${out_file}` );
 
 			if( restart_timeout !== null ){
 				clearInterval(restart_timeout);
 			}
+
+			// if was the initial kick last time, but have restablished a connection, notify
+			if( last_kick===false && kick_is_from_subprocess===true ){
+				
+				let this_notify=new Date().getTime();
+				// don't notify more than once a minute
+				if((last_notify+1000*60)<this_notify){
+					notify(`First good loop for ${out_file}`); // findmedrew
+					last_notify=this_notify;
+				}
+			}
+			
+			last_kick=kick_is_from_subprocess;
 
 			restart_timeout = setTimeout(async()=>{
 				customLog(`---------- NO UPDATE; RESTARTING RECORDING ${out_file} ----------`);
@@ -121,7 +136,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 		}
 
 		// initial interval... will be called in a loop later 
-		kickTheCan();
+		kickTheCan(false);
 	}
 
 	startRecording();
