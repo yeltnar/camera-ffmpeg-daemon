@@ -47,6 +47,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 		let ffmpeg_process = null; 
 		let restart_timeout = null;
 		let killed = false;
+		let writableStream = fs.createWriteStream(`./${out_file}.log`);
 
 		ffmpeg_process = spawn('ffmpeg',[
 			// `-loglevel`, `verbose`,
@@ -71,8 +72,9 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 
 			// TODO check if frame log, maybe take action on other events too 
 			if( /frame/.test(s) ){
-				kickTheCan(false);
+				kickTheCan(true);
 			}
+			writableStream.write(data);
 		});
 	
 		ffmpeg_process.on('exit', function (code) {
@@ -96,11 +98,13 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 			// if was the initial kick last time, but have restablished a connection, notify
 			if( last_kick===false && kick_is_from_subprocess===true ){
 				
-				let this_notify=new Date().getTime();
+				let this_notify_timestamp=new Date().getTime();
 				// don't notify more than once a minute
-				if((last_notify+1000*60)<this_notify){
+				console.log(`I think we're back after a restart. ${out_file}`);
+				console.log({last_notify,this_notify_timestamp});
+				if((last_notify+1000*60)<this_notify_timestamp){
 					notify(`First good loop for ${out_file}`); // findmedrew
-					last_notify=this_notify;
+					last_notify=this_notify_timestamp;
 				}
 			}
 			
@@ -127,6 +131,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 				if(killed){
 					startRecording();
 					restartCallbackFn();
+					writableStream.close();
 				}else{
 					notify(`Could not kill camera record process for ${out_file}`);
 					throw new Error('Could not close old process... not sure how to continue');
