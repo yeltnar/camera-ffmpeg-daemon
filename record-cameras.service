@@ -3,8 +3,10 @@ Description=Streamer
 After=multi-user.target network-online.target
 
 [Service]
-WorkingDirectory=/home/drew/playin/camera-ffmpeg-daemon # change this to the path of the git repo
-ExecStart='node main.js'
+WorkingDirectory=/home/drew/playin/camera-ffmpeg-daemon
+User=drew
+Group=drew
+ExecStart='/home/drew/playin/camera-ffmpeg-daemon/run.sh'
 KillMode=control-group
 Restart=on-failure
 TimeoutSec=1
