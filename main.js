@@ -197,12 +197,14 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 })();
 
 function notify(text){
-	console.error(`\nnotify is not set up\n`);
 	axios.post(`https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush?apikey=${join_api_key}&deviceId=group.android`,{
 		title:"title",
 		text
+	}).catch((e)=>{
+		console.error(`error sending notification`);
+		console.error(`\n${text}\n`);
+		console.error(e);
 	});
-	console.error(`\n${text}\n`);
 }
 
 function timeoutPromise(ms){
