@@ -133,6 +133,11 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 					startRecording();
 					restartCallbackFn();
 					writableStream.close();
+					try{
+						fs.copyFileSync(`./${out_file}.log`, `./${out_file}.restart.log`);
+					}catch(e){
+						console.log(`issue copying file ${out_file}`);
+					}
 				}else{
 					notify(`Could not kill camera record process for ${out_file}`);
 					throw new Error('Could not close old process... not sure how to continue');
@@ -203,6 +208,7 @@ function notify(text){
 		text
 	}).catch((e)=>{
 		console.error(`error sending notification`);
+		console.error(`\n${text}\n`);
 		console.error(e);
 	});
 }
