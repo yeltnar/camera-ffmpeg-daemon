@@ -57,6 +57,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 			`-hwaccel_output_format`, `vaapi`,
 			`-i`, input,
 			`-c`, `copy`,
+			`-reset_timestamps`, `1`,
 			`-map`, `0`,
 			`-segment_time`, segment_time,
 			`-f`, `segment`,
@@ -202,7 +203,6 @@ function notify(text){
 		text
 	}).catch((e)=>{
 		console.error(`error sending notification`);
-		console.error(`\n${text}\n`);
 		console.error(e);
 	});
 }
