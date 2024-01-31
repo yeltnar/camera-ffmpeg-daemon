@@ -33,10 +33,9 @@ const customInfo = (()=>{
 	return customInfo;
 })();
 
-function setupRecording( {input, out_dir, out_file, segment_time, restartCallbackFn} ){
+function setupRecording( {input, out_dir, out_file, segment_time, other_args, restartCallbackFn} ){
 
 	segment_time = segment_time || `00:05:00`;
-
 	
 	const restart_delay = 5000;
 	const disconnect_start_delay = 10000;
@@ -49,7 +48,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 		let killed = false;
 		let writableStream = fs.createWriteStream(`./${out_file}.log`);
 
-		ffmpeg_process = spawn('ffmpeg',[
+		const args = [
 			// `-loglevel`, `verbose`,
 			`-hwaccel_flags`, `allow_profile_mismatch`,
 			`-hwaccel`, `vaapi`,
@@ -61,9 +60,16 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 			`-map`, `0`,
 			`-segment_time`, segment_time,
 			`-f`, `segment`,
-			`-strftime`, `1`,
-			`${out_dir}/${out_file}`
-		]);
+			`-strftime`, `1`,			
+		];
+
+		if( other_args!==undefined && other_args!==null ){
+			args.push(...other_args);
+		}
+
+		args.push(`${out_dir}/${out_file}`);
+
+		ffmpeg_process = spawn('ffmpeg',args);
 	
 		// all ffmpeg logs go to stderror to allow for stdout to be piped to another process
 		ffmpeg_process.stderr.on('data', function (data) {
@@ -196,6 +202,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, restartCallbac
 			out_dir: feeds[i].out_dir,
 			out_file: feeds[i].out_file,
 			segment_time: feeds[i].segment_time,
+			other_args: feeds[i].other_args,
 			restartCallbackFn,
 		});	
 	});
