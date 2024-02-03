@@ -1,6 +1,7 @@
 const spawn = require('child_process').spawn;
 const config = require('config');
 const fs = require('fs');
+const fs_promise = require('fs/promises');
 const axios = require('axios');
 
 let timeout_count=0;
@@ -12,7 +13,7 @@ const {join_api_key, feeds} = config;
 const customLog = (()=>{
 	let customLog;
 	const extra_log_file = `./extra_log_file.log`;
-	fs.unlink(extra_log_file).catch(()=>{});
+	fs_promise.unlink(extra_log_file).catch(()=>{});
 	if(/nolog/.test(process.argv[2])){
 		customLog = (...a)=>{
 			let to_write;
@@ -21,7 +22,7 @@ const customLog = (()=>{
 			}else{
 				to_write = a;
 			}
-			fs.writeFile(extra_log_file, a).catch(()=>{}); 
+			fs_promise.writeFile(extra_log_file, a).catch(()=>{}); 
 		};
 	}else{
 		customLog = function (...a){
@@ -47,7 +48,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, re
 
 	segment_time = segment_time || `00:05:00`;
 	
-	const restart_delay = 5000;
+	const restart_delay = 10000;
 	const disconnect_start_delay = 10000;
 
 	let last_notify=-1;
