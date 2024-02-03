@@ -11,8 +11,18 @@ const {join_api_key, feeds} = config;
 
 const customLog = (()=>{
 	let customLog;
+	const extra_log_file = `./extra_log_file.log`;
+	fs.unlink(extra_log_file).catch(()=>{});
 	if(/nolog/.test(process.argv[2])){
-		customLog = ()=>{};
+		customLog = (...a)=>{
+			let to_write;
+			if(Array.isArray(a)){
+				to_write = a.join(", ");
+			}else{
+				to_write = a;
+			}
+			fs.writeFile(extra_log_file, a).catch(()=>{}); 
+		};
 	}else{
 		customLog = function (...a){
 			console.log(...a);
