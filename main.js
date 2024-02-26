@@ -181,7 +181,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, i}
 
 			// if was the initial kick last time, but have restablished a connection, notify
 			if( is_first_call===true ){
-				// notify(`Started ${out_file}`); // TODO add back 
+				notify(`Started ${out_file}`);
 				
 				// let this_notify_timestamp=new Date().getTime();
 				// don't notify more than once a minute
