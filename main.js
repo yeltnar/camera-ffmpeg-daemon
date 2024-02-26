@@ -104,7 +104,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, re
 			killed=true;
 		});
 
-		let last_kick=false;
+		// let last_kick=false;
 		function kickTheCan(kick_is_from_subprocess=true){
 
 			customInfo(`kickTheCan ${out_file}` );
@@ -114,19 +114,19 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, re
 			}
 
 			// if was the initial kick last time, but have restablished a connection, notify
-			if( last_kick===false && kick_is_from_subprocess===true ){
+			if( kick_is_from_subprocess===false ){
 				
-				let this_notify_timestamp=new Date().getTime();
+				// let this_notify_timestamp=new Date().getTime();
 				// don't notify more than once a minute
-				console.log(`I think we're back after a restart. ${out_file}`);
-				console.log({last_notify,this_notify_timestamp});
-				if((last_notify+1000*60)<this_notify_timestamp){
+				// console.log(`I think we're back after a restart. ${out_file}`);
+				// console.log({last_notify,this_notify_timestamp});
+				// if((last_notify+1000*60)<this_notify_timestamp){
 					notify(`First good loop for ${out_file}`); // findmedrew
-					last_notify=this_notify_timestamp;
-				}
+				// 	last_notify=this_notify_timestamp;
+				// }
 			}
 			
-			last_kick=kick_is_from_subprocess;
+			// last_kick=kick_is_from_subprocess;
 
 			restart_timeout = setTimeout(async()=>{
 				customLog(`---------- NO UPDATE; RESTARTING RECORDING ${out_file} ----------`);
