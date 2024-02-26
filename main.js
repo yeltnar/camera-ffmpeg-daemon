@@ -44,7 +44,7 @@ const customInfo = (()=>{
 	return customInfo;
 })();
 
-function setupRecording( {input, out_dir, out_file, segment_time, other_args, i} ){
+function setupRecording( {name, input, out_dir, out_file, segment_time, other_args, i} ){
 
 	const last_good_frame = new Date()
 	let known_down = false;
@@ -98,7 +98,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, i}
 			const now = new Date();
 			const time_diff = now.getTime() - last_good_frame.getTime();
 			if( time_diff > report_when_camera_down_ms && known_down===false ){
-				notify('camera down for a while '+out_file);
+				notify('camera down for a while '+name);
 				known_down = true;
 			}
 			console.log({time_diff,time_diff,now,last_good_frame,})
@@ -167,7 +167,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, i}
 				if( known_down === true ){
 					const down_time = (new Date().getTime()) - last_good_frame.getTime();
 					notify({
-						title:`camera up after down for a while ${out_file}`,
+						title:`camera up after down for a while ${name}`,
 						text:`down ${smartTimeStr(down_time)}`
 					});
 					known_down = false;
@@ -181,7 +181,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, i}
 
 			// if was the initial kick last time, but have restablished a connection, notify
 			if( is_first_call===true ){
-				notify(`Started ${out_file}`);
+				notify(`Started ${name}`);
 				
 				// let this_notify_timestamp=new Date().getTime();
 				// don't notify more than once a minute
@@ -224,7 +224,7 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, i}
 						console.log(`issue copying file ${out_file}`);
 					}
 				}else{
-					notify(`Could not kill camera record process for ${out_file}`);
+					notify(`Could not kill camera record process for ${name}`);
 					throw new Error('Could not close old process... not sure how to continue');
 				}
 
@@ -246,8 +246,8 @@ function setupRecording( {input, out_dir, out_file, segment_time, other_args, i}
 			console.error(`out_dir does not exist - ${feeds[i].out_dir}`);
 		}
 
-
 		setupRecording( {
+			name: feeds[i].name || feeds[i].out_file, 
 			input: feeds[i].input,
 			out_dir: feeds[i].out_dir,
 			out_file: feeds[i].out_file,
