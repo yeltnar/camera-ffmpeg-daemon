@@ -152,19 +152,9 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 			// if was the initial kick last time, but have restablished a connection, notify
 			if( is_first_call===true ){
 				notify(`Started ${name}`);
-				
-				// let this_notify_timestamp=new Date().getTime();
-				// don't notify more than once a minute
-				// console.log(`I think we're back after a restart. ${out_file}`);
-				// console.log({last_notify,this_notify_timestamp});
-				// if((last_notify+1000*60)<this_notify_timestamp){
-				// 	last_notify=this_notify_timestamp;
-				// }
 			}else{
 
 			}
-			
-			// last_kick=kick_is_from_subprocess;
 
 			restart_timeout = setTimeout(async()=>{
 				customLog(`---------- NO UPDATE; RESTARTING RECORDING ${out_file} ----------`);
