@@ -68,7 +68,10 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 			const now = new Date();
 			const time_diff = now.getTime() - last_good_frame.getTime();
 			if( time_diff > report_when_camera_down_ms && known_down===false ){
-				notify('camera down for a while '+name);
+				notify({
+					title:`${name} - camera down`,
+					text:`${new Date().getTime()}`,
+				});
 				known_down = true;
 			}
 			console.log({time_diff,time_diff,now,last_good_frame,})
@@ -135,10 +138,11 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 
 			if( is_first_call===false && init_recording!==true ){
 				if( known_down === true ){
-					const down_time = (new Date().getTime()) - last_good_frame.getTime();
+					const now = new Date();
+					const down_time = (now.getTime()) - last_good_frame.getTime();
 					notify({
-						title:`camera up after down for a while ${name}`,
-						text:`down ${smartTimeStr(down_time)}`
+						title:`${name} - camera back up`,
+						text:`${now.getTime()} - down for ${smartTimeStr(down_time)}`,
 					});
 					known_down = false;
 				}
@@ -151,7 +155,10 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 
 			// if was the initial kick last time, but have restablished a connection, notify
 			if( is_first_call===true ){
-				notify(`Started ${name}`);
+				notify({
+					title:`${name} - started`,
+					text:`${new Date().getTime()}`,
+				});
 			}else{
 
 			}
@@ -183,7 +190,10 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 						console.log(`issue copying file ${out_file}`);
 					}
 				}else{
-					notify(`Could not kill camera record process for ${name}`);
+					notify({
+						title:`${name} - error`,
+						text:`${now.getTime()} - Could not kill camera record process`,
+					});
 					writableStream.close();
 					throw new Error('Could not close old process... not sure how to continue');
 				}
