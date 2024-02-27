@@ -108,7 +108,7 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 
 			customInfo(s);
 
-			// TODO check if frame log, maybe take action on other events too 
+			// check if frame log // TODO maybe take action on other events too 
 			if( /frame/.test(s) ){
 				kickTheCan({is_first_call:false});
 			}
@@ -194,6 +194,7 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 					}
 				}else{
 					notify(`Could not kill camera record process for ${name}`);
+					writableStream.close();
 					throw new Error('Could not close old process... not sure how to continue');
 				}
 
