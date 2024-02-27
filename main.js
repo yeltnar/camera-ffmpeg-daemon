@@ -49,36 +49,6 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 	const last_good_frame = new Date()
 	let known_down = false;
 
-	const restartCallbackFn = (()=>{
-		let restart_count=0;
-		let last_restart_notified=null;
-
-		return function restartCallbackFn(){
-			
-			const max_restart_count = 2;
-			
-			console.log({
-				"msg":"restartCallbackFn",
-				out_file:feeds[i].out_file,
-				restart_count,
-				max_restart_count,
-			});
-			
-			if( restart_count >= max_restart_count ){
-				if(last_restart_notified === null){
-					// notify(`camera restarting ${restart_count} times - ${feeds[i].out_file}`); // TODO consider this 
-					last_restart_notified=new Date();
-					setTimeout(()=>{
-						last_restart_notified=null;
-					},1000*60*60); // reset after 1 hr
-				}
-				restart_count=0;
-			}else{
-				restart_count++
-			}
-		}	
-	})();
-
 	segment_time = segment_time || `00:05:00`;
 	
 	const restart_delay = 10000;
@@ -216,7 +186,6 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 
 				if(killed){
 					startRecording({is_first_call:false, last_good_frame});
-					restartCallbackFn();
 					writableStream.close();
 					try{
 						fs.copyFileSync(`./${out_file}.log`, `./${out_file}.restart.log`);
