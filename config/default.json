@@ -1,4 +1,5 @@
 {
+    "report_when_camera_down_ms":30000,
     "feeds": [
         {
             "input": "rtsp://admin:pasword@device.lan:554",
