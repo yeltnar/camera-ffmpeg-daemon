@@ -70,7 +70,7 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 			if( time_diff > report_when_camera_down_ms && known_down===false ){
 				notify({
 					title:`${name} - camera down`,
-					text:`${new Date().getTime()}`,
+					text:`${niceDate(new Date())}`,
 				});
 				known_down = true;
 			}
@@ -142,7 +142,7 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 					const down_time = (now.getTime()) - last_good_frame.getTime();
 					notify({
 						title:`${name} - camera back up`,
-						text:`${now.getTime()} - down for ${smartTimeStr(down_time)}`,
+						text:`${niceDate(now)} - down for ${smartTimeStr(down_time)}`,
 					});
 					known_down = false;
 				}
@@ -157,7 +157,7 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 			if( is_first_call===true ){
 				notify({
 					title:`${name} - started`,
-					text:`${new Date().getTime()}`,
+					text:`${niceDate(new Date())}`,
 				});
 			}else{
 
@@ -192,7 +192,7 @@ function setupRecording( {name, input, out_dir, out_file, segment_time, other_ar
 				}else{
 					notify({
 						title:`${name} - error`,
-						text:`${now.getTime()} - Could not kill camera record process`,
+						text:`${niceDate(new Date())} - Could not kill camera record process`,
 					});
 					writableStream.close();
 					throw new Error('Could not close old process... not sure how to continue');
@@ -273,4 +273,22 @@ function smartTimeStr(ms_count){
 		return `${parseInt(ms_count/ONE_HR*100)/100} hr`
 	}
 
+}
+
+function niceDate(date_obj){
+    const full_year = date_obj.getFullYear();
+    const month = date_obj.getMonth();
+    const date = date_obj.getDate();
+    const hours = date_obj.getHours();
+    const minutes = date_obj.getMinutes();
+    const seconds = date_obj.getSeconds();
+
+    return `${zeroPad(month)}/${zeroPad(date)} ${zeroPad(hours)}:${zeroPad(minutes)}:${zeroPad(seconds)}`;
+}
+
+function zeroPad(num){
+	if(num<10){
+		return "0"+num;
+	}
+	return num;
 }
